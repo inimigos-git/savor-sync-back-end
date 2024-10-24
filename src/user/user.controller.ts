@@ -44,7 +44,14 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    try {
+      return this.userService.findOne(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetch user');
+    }
   }
 
   @Patch(':id')

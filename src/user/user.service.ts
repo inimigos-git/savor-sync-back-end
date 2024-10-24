@@ -32,14 +32,22 @@ export class UserService {
     const users = await this.prisma.users.findMany({});
 
     if (users.length === 0) {
-      throw new NotFoundException('No users found');
+      throw new NotFoundException('Users not found');
     }
 
     return users;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.prisma.users.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
