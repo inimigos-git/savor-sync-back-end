@@ -25,41 +25,41 @@ O projeto está atualmente em fase de desenvolvimento.
 - TypeScript
 - Zod
 
-## Estrutura do Projeto
+## Estrutura do Projeto (Atualmente)
 
 ```
-SAVORSYNC/
-│
-├── prisma/
-│   ├── migrations/
-│   └── schema.prisma
-│
-├── src/
-│   ├── config/
-│   │   └── prisma.js
-│   │
-│   ├── controllers/
-│   │
-│   ├── middlewares/
-│   │
-│   ├── models/
-│   │
-│   ├── routes/
-│   │
-│   ├── schemas/
-│   │
-│   └── index.js
-│
-├── tests/
-│   └── unit/
-│   └── integration
-│   └── e2e/
-│
-├── .env.example
-├── .gitignore
-├── jest.config.js
-├── package-lock.json
-└── package.json
+node_modules/
+prisma/
+    ├── migrations/
+    ├── prisma.service.ts
+    ├── schema.prisma
+    └── seed.ts
+src/
+    ├── user/
+    │   ├── dto/
+    │   │   ├── create-user.dto.ts
+    │   │   └── update-user.dto.ts
+    │   ├── entities/
+    │   │   └── user.entity.ts
+    │   ├── user.controller.ts
+    │   ├── user.module.ts
+    │   └── user.service.ts
+    ├── app.controller.spec.ts
+    ├── app.controller.ts
+    ├── app.module.ts
+    ├── app.service.ts
+    └── main.ts
+test/
+.env.example
+.eslintrc.js
+.gitignore
+.prettierrc
+nest-cli.json
+package-lock.json
+package.json
+README.md
+tsconfig.build.json
+tsconfig.json
 ```
 
 ## Pré-requisitos
