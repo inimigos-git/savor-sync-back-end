@@ -72,10 +72,10 @@ tsconfig.json
 
 ```bash
 # Clone o repositório
-git clone https://github.com/EdEddAEddy/SavorSync.git
+git clone https://github.com/inimigos-git/savor-sync-back-end
 
 # Entre no diretório
-cd savorsync
+cd savor-sync-back-end
 
 # Instale as dependências
 npm install
