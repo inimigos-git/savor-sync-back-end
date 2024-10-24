@@ -25,7 +25,7 @@ export class UserController {
       if (error instanceof ConflictException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar usuário');
+      throw new InternalServerErrorException('Error creating user');
     }
   }
 
