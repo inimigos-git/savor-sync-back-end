@@ -8,6 +8,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Prisma, Users } from '@prisma/client';
 
+export type UserWithoutPassword = Omit<Users, 'password_hash'>;
+
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -28,8 +30,15 @@ export class UserService {
     });
   }
 
-  async findAll() {
-    const users = await this.prisma.users.findMany({});
+  async findAll(): Promise<UserWithoutPassword[]> {
+    const users = await this.prisma.users.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      },
+    });
 
     if (users.length === 0) {
       throw new NotFoundException('Users not found');
@@ -38,9 +47,15 @@ export class UserService {
     return users;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<UserWithoutPassword> {
     const user = await this.prisma.users.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      },
     });
 
     if (!user) {
