@@ -3,8 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Prisma, Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -68,14 +66,44 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: number,
+    data: Prisma.UsersUpdateInput,
+  ): Promise<UserWithoutPassword> {
+    if (!id) {
+      throw new NotFoundException('User ID is required');
+    }
+    const user = await this.prisma.users.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (typeof data.email === 'string') {
+      const emailExisting = await this.prisma.users.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+
+      if (emailExisting) {
+        throw new ConflictException('Email is already in use');
+      }
+    }
+
+    return await this.prisma.users.update({
+      where: { id },
+      data,
+      select: userSelect,
+    });
   }
 
   remove(id: number) {
