@@ -151,7 +151,14 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return await this.userService.update(+id, updateUserDto);
+    try {
+      return await this.userService.update(+id, updateUserDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching user');
+    }
   }
 
   @Delete(':id')
@@ -163,6 +170,13 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async remove(@Param('id') id: string) {
-    return await this.userService.remove(+id);
+    try {
+      return await this.userService.remove(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching user');
+    }
   }
 }

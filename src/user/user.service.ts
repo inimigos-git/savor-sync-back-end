@@ -99,6 +99,10 @@ export class UserService {
       }
     }
 
+    if (typeof data.password_hash === 'string') {
+      data.password_hash = await bcrypt.hash(data.password_hash, 10);
+    }
+
     return await this.prisma.users.update({
       where: { id },
       data,
