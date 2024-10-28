@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'prisma/prisma.service';
 import { Prisma, Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 const userSelect = {
   id: true,
@@ -72,25 +73,18 @@ export class UserService {
     return user;
   }
 
-  async update(
-    id: number,
-    data: Prisma.UsersUpdateInput,
-  ): Promise<UserWithoutPassword> {
+  async update(id: number, data: UpdateUserDto): Promise<UserWithoutPassword> {
     if (!id) {
       throw new NotFoundException('User ID is required');
     }
-    const user = await this.prisma.users.findUnique({
-      where: { id },
-    });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    if (typeof data.email === 'string') {
-      const emailExisting = await this.prisma.users.findUnique({
+    if (data.email) {
+      const emailExisting = await this.prisma.users.findFirst({
         where: {
           email: data.email,
+          NOT: {
+            id: id,
+          },
         },
       });
 
@@ -99,15 +93,17 @@ export class UserService {
       }
     }
 
-    if (typeof data.password_hash === 'string') {
+    if (data.password_hash) {
       data.password_hash = await bcrypt.hash(data.password_hash, 10);
     }
 
-    return await this.prisma.users.update({
+    const updatedUser = await this.prisma.users.update({
       where: { id },
       data,
       select: userSelect,
     });
+
+    return updatedUser;
   }
 
   remove(id: number) {
