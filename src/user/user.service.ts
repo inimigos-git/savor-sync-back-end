@@ -7,6 +7,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { Prisma, Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 const userSelect = {
   id: true,
@@ -22,7 +23,7 @@ export type UserWithoutPassword = Pick<Users, keyof UserSelect>;
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.UsersCreateInput): Promise<UserWithoutPassword> {
+  async create(data: CreateUserDto): Promise<UserWithoutPassword> {
     const existingUser = await this.prisma.users.findUnique({
       where: {
         email: data.email,
