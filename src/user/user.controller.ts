@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +22,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags('Users')
 @Controller('user')
@@ -65,6 +67,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   @ApiOperation({
     summary: 'Get all users',
@@ -98,6 +101,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   @ApiOperation({
     summary: 'Get user by ID',
@@ -129,6 +133,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   @ApiOperation({
     summary: 'Update user',
@@ -164,6 +169,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user', description: 'Delete a user by ID' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID' })
