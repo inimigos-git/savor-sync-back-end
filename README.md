@@ -28,38 +28,49 @@ O projeto está atualmente em fase de desenvolvimento.
 ## Estrutura do Projeto (Atualmente)
 
 ```
-node_modules/
-prisma/
-    ├── migrations/
-    ├── prisma.service.ts
-    ├── schema.prisma
-    └── seed.ts
-src/
-    ├── user/
-    │   ├── dto/
-    │   │   ├── create-user.dto.ts
-    │   │   └── update-user.dto.ts
-    │   ├── entities/
-    │   │   └── user.entity.ts
-    │   ├── user.controller.ts
-    │   ├── user.module.ts
-    │   └── user.service.ts
-    ├── app.controller.spec.ts
-    ├── app.controller.ts
-    ├── app.module.ts
-    ├── app.service.ts
-    └── main.ts
-test/
-.env.example
-.eslintrc.js
-.gitignore
-.prettierrc
-nest-cli.json
-package-lock.json
-package.json
-README.md
-tsconfig.build.json
-tsconfig.json
+Directory structure:
+└── inimigos-git-savor-sync-back-end/
+    ├── README.md
+    ├── nest-cli.json
+    ├── package.json
+    ├── tsconfig.build.json
+    ├── tsconfig.json
+    ├── .env.example
+    ├── .eslintrc.js
+    ├── .prettierrc
+    ├── prisma/
+    │   ├── prisma.service.ts
+    │   ├── schema.prisma
+    │   ├── seed.ts
+    │   └── migrations/
+    │       ├── migration_lock.toml
+    │       └── 20241023223621_init/
+    │           └── migration.sql
+    ├── src/
+    │   ├── app.controller.spec.ts
+    │   ├── app.controller.ts
+    │   ├── app.module.ts
+    │   ├── app.service.ts
+    │   ├── main.ts
+    │   ├── auth/
+    │   │   ├── auth.controller.spec.ts
+    │   │   ├── auth.controller.ts
+    │   │   ├── auth.module.ts
+    │   │   ├── auth.service.spec.ts
+    │   │   ├── auth.service.ts
+    │   │   └── dto/
+    │   │       └── signIn.dto.ts
+    │   └── user/
+    │       ├── user.controller.ts
+    │       ├── user.module.ts
+    │       ├── user.service.ts
+    │       └── dto/
+    │           ├── create-user.dto.ts
+    │           └── update-user.dto.ts
+    └── test/
+        ├── app.e2e-spec.ts
+        └── jest-e2e.json
+
 ```
 
 ## Pré-requisitos
