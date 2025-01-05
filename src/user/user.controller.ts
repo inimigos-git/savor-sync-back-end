@@ -10,6 +10,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
   HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +23,8 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @ApiTags('Users')
 @Controller('user')
@@ -65,6 +69,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   @ApiOperation({
     summary: 'Get all users',
@@ -98,6 +103,43 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Get('me/reservations')
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  async findReservations(@Req() request: Request) {
+    try {
+      return await this.userService.findReservations(request['id'].id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      }
+
+      throw new InternalServerErrorException('Error fetching logged in user');
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('me')
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  async findMe(@Req() request: Request) {
+    try {
+      return await this.userService.findMe(request['id'].id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      }
+
+      throw new InternalServerErrorException('Error fetching logged in user');
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Get(':id')
   @ApiOperation({
     summary: 'Get user by ID',
@@ -129,6 +171,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   @ApiOperation({
     summary: 'Update user',
@@ -151,9 +194,20 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return await this.userService.update(+id, updateUserDto);
+    try {
+      return await this.userService.update(+id, updateUserDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error updating user');
+    }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user', description: 'Delete a user by ID' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID' })
@@ -163,6 +217,13 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async remove(@Param('id') id: string) {
-    return await this.userService.remove(+id);
+    try {
+      return await this.userService.remove(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error deleting user');
+    }
   }
 }
