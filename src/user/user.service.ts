@@ -146,6 +146,44 @@ export class UserService {
     return user;
   }
 
+  async updateMe(
+    id: number | string,
+    data: UpdateUserDto,
+  ): Promise<UserWithoutPassword> {
+    const numericUserId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    if (data.email) {
+      const emailExisting = await this.prisma.users.findUnique({
+        where: {
+          email: data.email,
+          NOT: {
+            id: numericUserId,
+          },
+        },
+      });
+
+      if (emailExisting) {
+        throw new ConflictException('Email is already in use');
+      }
+    }
+
+    if (data.password_hash) {
+      data.password_hash = await bcrypt.hash(data.password_hash, 10);
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: numericUserId },
+      data,
+      select: userSelect,
+    });
+
+    return updatedUser;
+  }
+
   async update(id: number, data: UpdateUserDto): Promise<UserWithoutPassword> {
     if (!id) {
       throw new NotFoundException('User ID is required');
@@ -179,7 +217,7 @@ export class UserService {
     return updatedUser;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(userId: number) {
+    return `This action removes a #${userId} user`;
   }
 }

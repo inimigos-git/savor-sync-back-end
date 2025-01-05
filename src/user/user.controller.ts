@@ -175,6 +175,26 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Patch(':id')
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  async updateMe(
+    @Req() request: Request,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    try {
+      return await this.userService.updateMe(request['id'].id, updateUserDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error updating user');
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch(':id')
   @ApiOperation({
     summary: 'Update user',
     description: 'Update user information by ID',
