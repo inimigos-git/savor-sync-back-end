@@ -99,7 +99,7 @@ export class UserController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error fetching users');
+      throw new InternalServerErrorException('Error fetching all users');
     }
   }
 
@@ -117,7 +117,9 @@ export class UserController {
         throw new InternalServerErrorException(error.message);
       }
 
-      throw new InternalServerErrorException('Error fetching logged in user');
+      throw new InternalServerErrorException(
+        'Error fetching user reservations',
+      );
     }
   }
 
@@ -135,7 +137,7 @@ export class UserController {
         throw new InternalServerErrorException(error.message);
       }
 
-      throw new InternalServerErrorException('Error fetching logged in user');
+      throw new InternalServerErrorException('Error fetching logged user');
     }
   }
 
@@ -167,7 +169,7 @@ export class UserController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error fetching user');
+      throw new InternalServerErrorException('Error fetching user by ID');
     }
   }
 
@@ -223,7 +225,7 @@ export class UserController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error deleting user');
+      throw new InternalServerErrorException('Error deleting user by ID');
     }
   }
 }
