@@ -65,8 +65,6 @@ export class UserService {
     const numericUserId =
       typeof userId === 'string' ? parseInt(userId, 10) : userId;
 
-    console.log('numericUserId 1', numericUserId);
-
     if (isNaN(numericUserId)) {
       throw new Error('Invalid user ID');
     }
