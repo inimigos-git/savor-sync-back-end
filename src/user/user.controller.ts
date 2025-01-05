@@ -11,6 +11,7 @@ import {
   NotFoundException,
   HttpStatus,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,6 +24,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @ApiTags('Users')
 @Controller('user')
@@ -98,6 +100,24 @@ export class UserController {
         throw error;
       }
       throw new InternalServerErrorException('Error fetching users');
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('me')
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  async findMe(@Req() request: Request) {
+    try {
+      return await this.userService.findMe(request['id'].id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      }
+
+      throw new InternalServerErrorException('Error fetching logged in user');
     }
   }
 
@@ -185,7 +205,7 @@ export class UserController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error fetching user');
+      throw new InternalServerErrorException('Error deleting user');
     }
   }
 }

@@ -61,6 +61,30 @@ export class UserService {
     return users;
   }
 
+  async findMe(userId: number | string): Promise<UserWithoutPassword> {
+    const numericUserId =
+      typeof userId === 'string' ? parseInt(userId, 10) : userId;
+
+    console.log('numericUserId 1', numericUserId);
+
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: numericUserId,
+      },
+      select: userSelect,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async findOne(id: number): Promise<UserWithoutPassword> {
     const user = await this.prisma.users.findUnique({
       where: { id },
