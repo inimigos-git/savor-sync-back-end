@@ -104,6 +104,24 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('me/reservations')
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  async findReservations(@Req() request: Request) {
+    try {
+      return await this.userService.findReservations(request['id'].id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      }
+
+      throw new InternalServerErrorException('Error fetching logged in user');
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Get('me')
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async findMe(@Req() request: Request) {

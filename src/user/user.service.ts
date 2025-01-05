@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { Prisma, Users } from '@prisma/client';
+import { Prisma, Users, Status } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -59,6 +59,56 @@ export class UserService {
     }
 
     return users;
+  }
+
+  async findReservations(userId: number): Promise<{
+    Reservations: {
+      id: number;
+      usersId: number;
+      restaurantsId: number;
+      tablesId: number;
+      reservation_date: Date;
+      reservation_time: Date;
+      party_size: number;
+      status: Status;
+      created_at: Date;
+      updated_at: Date;
+    }[];
+  }> {
+    const numericUserId =
+      typeof userId === 'string' ? parseInt(userId, 10) : userId;
+
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    const reservation = await this.prisma.users.findUnique({
+      where: {
+        id: numericUserId,
+      },
+      select: {
+        Reservations: {
+          select: {
+            id: true,
+            usersId: true,
+            restaurantsId: true,
+            tablesId: true,
+            reservation_date: true,
+            reservation_time: true,
+            party_size: true,
+            status: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+      },
+    });
+
+    if (reservation.Reservations.length === 0) {
+      throw new NotFoundException('Reservations not found');
+    }
+
+    return reservation;
   }
 
   async findMe(userId: number | string): Promise<UserWithoutPassword> {
