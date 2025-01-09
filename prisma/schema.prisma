@@ -13,6 +13,7 @@ model Users {
   email            String             @unique
   password_hash    String
   phone            String
+  role             UserRole           @default(customer)
   Reservations     Reservations[]
   RestaurantAdmins RestaurantAdmins[]
   Reviews          Reviews[]
@@ -134,4 +135,10 @@ enum Status {
 enum Role {
   owner
   manager
+}
+
+enum UserRole {
+  customer
+  admin
+  restaurant
 }
