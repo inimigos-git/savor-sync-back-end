@@ -108,7 +108,7 @@ export class UserController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async findReservations(@Req() request: Request) {
     try {
-      return await this.userService.findReservations(request['id'].id);
+      return await this.userService.findReservations(request['id'].sub);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -128,7 +128,7 @@ export class UserController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   async findMe(@Req() request: Request) {
     try {
-      return await this.userService.findMe(request['id'].id);
+      return await this.userService.findMe(request['id'].sub);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -181,7 +181,7 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     try {
-      return await this.userService.updateMe(request['id'].id, updateUserDto);
+      return await this.userService.updateMe(request['id'].sub, updateUserDto);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
