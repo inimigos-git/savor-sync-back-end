@@ -25,6 +25,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Request } from 'express';
+import { Roles } from 'src/role/roles.decorator';
+import { userRole } from 'src/role/enums/role.num';
+import { RolesGuard } from 'src/role/roles.guard';
 
 @ApiTags('Users')
 @Controller('user')
@@ -69,8 +72,9 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get()
+  @Roles(userRole.Admin)
   @ApiOperation({
     summary: 'Get all users',
     description: 'Retrieve a list of all users',
