@@ -145,8 +145,9 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get(':id')
+  @Roles(userRole.Admin)
   @ApiOperation({
     summary: 'Get user by ID',
     description: 'Retrieve a specific user by their ID',

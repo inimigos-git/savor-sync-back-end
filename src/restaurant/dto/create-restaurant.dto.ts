@@ -1,32 +1,82 @@
-export class CreateRestaurantDto {}
-import { IsEmail, IsPhoneNumber, IsString, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PriceRange } from '@prisma/client';
 
-export class CreateUserDto {
-  @ApiProperty({ example: 'John Doe', description: 'The name of the user' })
+export class CreateRestaurantDto {
+  @ApiProperty({
+    example: 'Pizza Hut',
+    description: 'The name of the restaurant',
+  })
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty({
-    example: 'john@example.com',
-    description: 'The email of the user',
-  })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({
-    example: '123456',
-    description: 'The password for the account',
+    example: 'Best pizza in town since 1990',
+    description: 'Description of the restaurant',
   })
   @IsString()
-  @MinLength(6)
-  password_hash: string;
+  @IsNotEmpty()
+  description: string;
 
   @ApiProperty({
-    example: '1234567890',
-    description: 'The phone number of the user',
+    example: '123 Main Street, New York, NY',
+    description: 'Physical address of the restaurant',
   })
   @IsString()
-  @IsPhoneNumber('BR')
-  phone: string;
+  @IsNotEmpty()
+  address: string;
+
+  @ApiProperty({
+    example: 'Italian',
+    description: 'Type of cuisine served',
+  })
+  @IsString()
+  @IsNotEmpty()
+  cuisine_type: string;
+
+  @ApiProperty({
+    enum: PriceRange,
+    example: PriceRange.two,
+    description: 'Price range category (one, two, three, four)',
+  })
+  @IsEnum(PriceRange)
+  @IsNotEmpty()
+  price_range: PriceRange;
+
+  @ApiProperty({
+    example: {
+      monday: { open: '09:00', close: '22:00' },
+      tuesday: { open: '09:00', close: '22:00' },
+    },
+    description: 'Operating hours for each day of the week',
+  })
+  @IsObject()
+  @IsNotEmpty()
+  opening_hours: Record<string, { open: string; close: string }>;
+
+  @ApiProperty({
+    example: -23.5505,
+    description: 'Latitude coordinate of the restaurant location',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional() // Add this decorator
+  latitude?: number;
+
+  @ApiProperty({
+    example: -46.6333,
+    description: 'Longitude coordinate of the restaurant location',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional() // Add this decorator
+  longitude?: number;
 }

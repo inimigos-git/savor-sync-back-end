@@ -21,13 +21,21 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createRestaurantDto: CreateRestaurantDto) {
-    return this.restaurantService.create(createRestaurantDto);
+    try {
+      return this.restaurantService.create(createRestaurantDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error creating a new restaurants',
+      );
+    }
   }
 
   @Get()
-  @UseGuards(AuthGuard)
   async(@Query() query: PaginationDto) {
     try {
       return this.restaurantService.findAll(query);

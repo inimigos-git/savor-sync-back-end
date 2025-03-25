@@ -26,8 +26,8 @@ model Restaurants {
   name             String
   description      String
   address          String
-  latitude         Float
-  longitude        Float
+  latitude         Float?
+  longitude        Float?
   cuisine_type     String
   price_range      PriceRange
   opening_hours    Json

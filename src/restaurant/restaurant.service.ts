@@ -5,6 +5,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { PriceRange } from '@prisma/client';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
+import { promises } from 'dns';
 
 export interface RestaurantBasicSelect {
   id: number;
@@ -26,8 +27,32 @@ export const restaurantBasicSelect = {
 export class RestaurantService {
   constructor(private prisma: PrismaService) {}
 
-  create(createRestaurantDto: CreateRestaurantDto) {
-    return 'This action adds a new restaurant';
+  async create(data: CreateRestaurantDto): Promise<RestaurantBasicSelect> {
+    const existingRestaurant = await this.prisma.restaurants.findFirst({
+      where: { name: data.name },
+    });
+
+    if (existingRestaurant) {
+      throw new NotFoundException('Restaurant already exists');
+    }
+
+    const restaurant = await this.prisma.restaurants.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        address: data.address,
+        cuisine_type: data.cuisine_type,
+        price_range: data.price_range,
+        opening_hours: data.opening_hours,
+      },
+      select: restaurantBasicSelect,
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException('Restaurant not created');
+    }
+
+    return restaurant;
   }
 
   async findAll(
