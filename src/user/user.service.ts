@@ -4,8 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { Prisma, Users } from '@prisma/client';
+import { Prisma, Users, Status } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 const userSelect = {
   id: true,
@@ -21,7 +23,7 @@ export type UserWithoutPassword = Pick<Users, keyof UserSelect>;
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.UsersCreateInput): Promise<UserWithoutPassword> {
+  async create(data: CreateUserDto): Promise<UserWithoutPassword> {
     const existingUser = await this.prisma.users.findUnique({
       where: {
         email: data.email,
@@ -59,6 +61,78 @@ export class UserService {
     return users;
   }
 
+  async findReservations(userId: number): Promise<{
+    Reservations: {
+      id: number;
+      usersId: number;
+      restaurantsId: number;
+      tablesId: number;
+      reservation_date: Date;
+      reservation_time: Date;
+      party_size: number;
+      status: Status;
+      created_at: Date;
+      updated_at: Date;
+    }[];
+  }> {
+    const numericUserId =
+      typeof userId === 'string' ? parseInt(userId, 10) : userId;
+
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    const reservation = await this.prisma.users.findUnique({
+      where: {
+        id: numericUserId,
+      },
+      select: {
+        Reservations: {
+          select: {
+            id: true,
+            usersId: true,
+            restaurantsId: true,
+            tablesId: true,
+            reservation_date: true,
+            reservation_time: true,
+            party_size: true,
+            status: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+      },
+    });
+
+    if (reservation.Reservations.length === 0) {
+      throw new NotFoundException('Reservations not found');
+    }
+
+    return reservation;
+  }
+
+  async findMe(userId: number | string): Promise<UserWithoutPassword> {
+    const numericUserId =
+      typeof userId === 'string' ? parseInt(userId, 10) : userId;
+
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: numericUserId,
+      },
+      select: userSelect,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async findOne(id: number): Promise<UserWithoutPassword> {
     const user = await this.prisma.users.findUnique({
       where: { id },
@@ -72,25 +146,23 @@ export class UserService {
     return user;
   }
 
-  async update(
-    id: number,
-    data: Prisma.UsersUpdateInput,
+  async updateMe(
+    id: number | string,
+    data: UpdateUserDto,
   ): Promise<UserWithoutPassword> {
-    if (!id) {
-      throw new NotFoundException('User ID is required');
-    }
-    const user = await this.prisma.users.findUnique({
-      where: { id },
-    });
+    const numericUserId = typeof id === 'string' ? parseInt(id, 10) : id;
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID');
     }
 
-    if (typeof data.email === 'string') {
+    if (data.email) {
       const emailExisting = await this.prisma.users.findUnique({
         where: {
           email: data.email,
+          NOT: {
+            id: numericUserId,
+          },
         },
       });
 
@@ -99,14 +171,53 @@ export class UserService {
       }
     }
 
-    return await this.prisma.users.update({
+    if (data.password_hash) {
+      data.password_hash = await bcrypt.hash(data.password_hash, 10);
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: numericUserId },
+      data,
+      select: userSelect,
+    });
+
+    return updatedUser;
+  }
+
+  async update(id: number, data: UpdateUserDto): Promise<UserWithoutPassword> {
+    if (!id) {
+      throw new NotFoundException('User ID is required');
+    }
+
+    if (data.email) {
+      const emailExisting = await this.prisma.users.findFirst({
+        where: {
+          email: data.email,
+          NOT: {
+            id: id,
+          },
+        },
+      });
+
+      if (emailExisting) {
+        throw new ConflictException('Email is already in use');
+      }
+    }
+
+    if (data.password_hash) {
+      data.password_hash = await bcrypt.hash(data.password_hash, 10);
+    }
+
+    const updatedUser = await this.prisma.users.update({
       where: { id },
       data,
       select: userSelect,
     });
+
+    return updatedUser;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(userId: number) {
+    return `This action removes a #${userId} user`;
   }
 }

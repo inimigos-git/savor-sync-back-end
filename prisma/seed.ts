@@ -1,4 +1,10 @@
-import { PrismaClient, PriceRange, Status, Role } from '@prisma/client';
+import {
+  PrismaClient,
+  PriceRange,
+  Status,
+  Role,
+  UserRole,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -15,6 +21,8 @@ type RestaurantHours = {
 
 async function createUsers() {
   const users = [];
+  const userRoles = [UserRole.customer, UserRole.admin, UserRole.restaurant];
+
   for (let i = 1; i <= 10; i++) {
     const user = await prisma.users.create({
       data: {
@@ -22,6 +30,7 @@ async function createUsers() {
         email: `user${i}@example.com`,
         password_hash: await bcrypt.hash('password123', 10),
         phone: `+1${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+        role: userRoles[Math.floor(Math.random() * userRoles.length)],
       },
     });
     users.push(user);
