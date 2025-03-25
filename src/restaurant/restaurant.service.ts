@@ -151,8 +151,39 @@ export class RestaurantService {
     return restaurant;
   }
 
-  update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
-    return `This action updates a #${id} restaurant`;
+  async update(
+    id: number,
+    data: UpdateRestaurantDto,
+  ): Promise<RestaurantBasicSelect> {
+    if (!data) {
+      throw new NotFoundException('No data provided for update');
+    }
+
+    if (!id) {
+      throw new NotFoundException('No ID provided for update');
+    }
+
+    const restaurant = await this.prisma.restaurants.findUnique({
+      where: { id },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    const patchRestaurant = await this.prisma.restaurants.update({
+      where: { id },
+      data: {
+        ...data,
+      },
+      select: restaurantBasicSelect,
+    });
+
+    if (!patchRestaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    return patchRestaurant;
   }
 
   remove(id: number) {

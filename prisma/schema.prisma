@@ -51,7 +51,7 @@ model Tables {
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   Reservations  Reservations[]
-  restaurant_id Restaurants    @relation(fields: [restaurantsId], references: [id])
+  restaurant_id Restaurants    @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
 
   @@map("tables")
 }
@@ -67,7 +67,7 @@ model Reservations {
   status           Status
   created_at       DateTime    @default(now())
   updated_at       DateTime    @updatedAt
-  restaurant_id    Restaurants @relation(fields: [restaurantsId], references: [id])
+  restaurant_id    Restaurants @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
   table_id         Tables      @relation(fields: [tablesId], references: [id])
   user_id          Users       @relation(fields: [usersId], references: [id])
 
@@ -82,7 +82,7 @@ model Reviews {
   comment       String
   create_at     DateTime    @default(now())
   update_at     DateTime    @updatedAt
-  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id])
+  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
   user_id       Users       @relation(fields: [usersId], references: [id])
 
   @@map("reviews")
@@ -93,7 +93,7 @@ model RestaurantAdmins {
   usersId       Int
   restaurantsId Int
   role          Role        @default(manager)
-  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id])
+  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
   user_id       Users       @relation(fields: [usersId], references: [id])
 
   @@map("restaurantAdmins")
@@ -108,7 +108,7 @@ model MenuItems {
   category      String
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
-  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id])
+  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
 }
 
 model RestaurantPhotos {
@@ -116,7 +116,7 @@ model RestaurantPhotos {
   restaurantsId Int
   photo_url     String
   is_primary    Boolean
-  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id])
+  restaurant_id Restaurants @relation(fields: [restaurantsId], references: [id], onDelete: Cascade)
 }
 
 enum PriceRange {

@@ -16,11 +16,16 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { RolesGuard } from 'src/role/roles.guard';
+import { Roles } from 'src/role/roles.decorator';
+import { userRole } from 'src/role/enums/role.num';
 
 @Controller('restaurant')
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(userRole.Admin)
   @Post('create')
   async create(@Body() createRestaurantDto: CreateRestaurantDto) {
     try {
@@ -66,11 +71,29 @@ export class RestaurantController {
     @Param('id') id: string,
     @Body() updateRestaurantDto: UpdateRestaurantDto,
   ) {
-    return this.restaurantService.update(+id, updateRestaurantDto);
+    try {
+      return this.restaurantService.update(+id, updateRestaurantDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Error updating restaurant with ID ${id}`,
+      );
+    }
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.restaurantService.remove(+id);
+    try {
+      return this.restaurantService.remove(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Error deleting restaurant with ID ${id}`,
+      );
+    }
   }
 }
