@@ -22,7 +22,7 @@ export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   @Post('create')
-  create(@Body() createRestaurantDto: CreateRestaurantDto) {
+  async create(@Body() createRestaurantDto: CreateRestaurantDto) {
     try {
       return this.restaurantService.create(createRestaurantDto);
     } catch (error) {
@@ -48,8 +48,17 @@ export class RestaurantController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.restaurantService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    try {
+      return this.restaurantService.findOne(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Error fetching restaurant with ID ${id}`,
+      );
+    }
   }
 
   @Patch(':id')

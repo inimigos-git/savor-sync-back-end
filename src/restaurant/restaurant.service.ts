@@ -102,8 +102,53 @@ export class RestaurantService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} restaurant`;
+  async findOne(id: number): Promise<RestaurantBasicSelect> {
+    const restaurant = await this.prisma.restaurants.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        price_range: true,
+        cuisine_type: true,
+        opening_hours: true,
+        MenuItems: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            category: true,
+          },
+        },
+        Reviews: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            user_id: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        RestaurantPhotos: {
+          select: {
+            id: true,
+            photo_url: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    return restaurant;
   }
 
   update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
