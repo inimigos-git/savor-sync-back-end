@@ -74,6 +74,11 @@ export class RestaurantService {
           address: true,
           price_range: true,
           cuisine_type: true,
+          Reviews: {
+            select: {
+              rating: true,
+            },
+          },
         },
         skip,
         take: limitNumber,
