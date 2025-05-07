@@ -12,9 +12,7 @@ export interface RestaurantBasicSelect {
   name: string;
   address: string;
   price_range: PriceRange;
-  cuisine_type: string;
 }
-
 export const restaurantBasicSelect = {
   id: true,
   name: true,
@@ -55,59 +53,70 @@ export class RestaurantService {
     return restaurant;
   }
 
-  async findAll(
-    paginationDto: PaginationDto,
-  ): Promise<PaginatedResponse<RestaurantBasicSelect>> {
-    const { page, limit } = paginationDto;
+async findAll(
+  paginationDto: PaginationDto,
+): Promise<PaginatedResponse<RestaurantBasicSelect>> {
+  const { page, limit, sort } = paginationDto;
 
-    const pageNumber = Number(page);
-    const limitNumber = Number(limit);
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const skip = (pageNumber - 1) * limitNumber >= 0 ? (pageNumber - 1) * limitNumber : 0;
 
-    const skip = (pageNumber - 1) * limit >= 0 ? (pageNumber - 1) * limit : 0;
+  const total = await this.prisma.restaurants.count();
 
-    const [total, restaurants] = await Promise.all([
-      this.prisma.restaurants.count(),
-      this.prisma.restaurants.findMany({
-        select: {
-          id: true,
-          name: true,
-          address: true,
-          price_range: true,
-          cuisine_type: true,
-          Reviews: {
-            select: {
-              rating: true,
-            },
-          },
+  let restaurants: any[] = [];
+
+  if (sort === "rating_desc") {
+    restaurants = await this.prisma.$queryRaw<
+      RestaurantBasicSelect[]
+    >`
+SELECT r.id, r.name, r.address, r.price_range, r.cuisine_type,
+  COALESCE(AVG(rv.rating), 0) as avg_rating
+FROM "restaurants" r
+LEFT JOIN "reviews" rv ON rv."restaurantsId" = r.id
+GROUP BY r.id
+ORDER BY avg_rating DESC
+OFFSET ${skip}
+LIMIT ${limitNumber}
+    `;
+  } else {
+    restaurants = await this.prisma.restaurants.findMany({
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        price_range: true,
+        cuisine_type: true,
+        Reviews: {
+          select: { rating: true },
         },
-        skip,
-        take: limitNumber,
-        orderBy: {
-          created_at: 'desc',
-        },
-      }),
-    ]);
-
-    if (restaurants.length === 0) {
-      throw new NotFoundException('Restaurants not found');
-    }
-
-    const lastPage = Math.ceil(total / limit);
-
-    return {
-      data: restaurants,
-      meta: {
-        total,
-        currentPage: pageNumber,
-        lastPage,
-        limit: limitNumber,
-        hasNextPage: pageNumber < lastPage,
-        hasPreviousPage: pageNumber > 1,
       },
-    };
+      skip,
+      take: limitNumber,
+      orderBy: { created_at: sort === "create_at_asc" ? "asc" : "desc" },
+    });
   }
 
-  async findOne(id: number): Promise<RestaurantBasicSelect> {
+  if (restaurants.length === 0) {
+    throw new NotFoundException('Restaurants not found');
+  }
+
+  const lastPage = Math.ceil(total / limitNumber);
+
+  return {
+    data: restaurants,
+    meta: {
+      total,
+      currentPage: pageNumber,
+      lastPage,
+      limit: limitNumber,
+      hasNextPage: pageNumber < lastPage,
+      hasPreviousPage: pageNumber > 1,
+    },
+  };
+}
+
+async findOne(id: number): Promise<RestaurantBasicSelect> {
     const restaurant = await this.prisma.restaurants.findUnique({
       where: { id },
       select: {

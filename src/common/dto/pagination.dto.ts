@@ -14,4 +14,7 @@ export class PaginationDto {
   @Max(100)
   @Type(() => Number)
   limit?: number = 10;
+
+  @IsOptional()
+  sort?: string;
 }
